@@ -30,6 +30,6 @@ class Mouse  {
         int lmb;    // left-mouse-button pressed 
         int mmb;    // middle-mouse-button pressed
         int rmb;    // right-mouse-button pressed 
-        int xpress;
-        int ypress;
+        int xpress; // Coordinates of last x-press
+        int ypress; // Coordinates of last y-press
 };
