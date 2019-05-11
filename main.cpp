@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-
 /** Include handmade Classes */
 #include "Mouse.hpp"
 
@@ -40,19 +39,21 @@ int winh = 480;
 typedef void (*ButtonCallback)();
 
 /** Button Stuff */
-struct Button {
-    int id; /** ID of the button */
-    int x; /** Top-left x-coord */
-    int y; /** Top-right y-coord */
-    int w; /** Button Width */
-    int h; /** Height of the button */
-    int state; /** 0 -> Idle, 1 -> Pressed */
-    int highlighted; /** Pointer over the button */
-    char* label; /** text label */
-    ButtonCallback callbackFunction; /** Function to call */
-    struct Button* next; /** Next button */
-};
+struct Button 
+{
+	int   x;							/* top left x coord of the button */
+	int   y;							/* top left y coord of the button */
+	int   w;							/* the width of the button */
+	int   h;							/* the height of the button */
+	int	  state;						/* the state, 1 if pressed, 0 otherwise */
+	int	  highlighted;					/* is the mouse cursor over the control? */
+	char* label;						/* the text label of the button */
+	ButtonCallback callbackFunction;	/* A pointer to a function to call if the button is pressed */
 
+	int id;								/* A unique ID to represent this Button */
+
+	struct Button* next;				/* a pointer to the next node in the linked list */
+};
 typedef struct Button Button;
 
 /** Linked-List of buttons */
@@ -71,7 +72,7 @@ int globalref = 0;
 */
 
 int CreateButton(char *label,ButtonCallback cb,int x,int y,int w,int h){
-    Button *p = (Button*)malloc(sizeof(Button));
+    Button* p = (Button*)malloc(sizeof(Button));
     assert(p); /** Checks if the structure initialized correctly */
     memset(p,0,sizeof(Button)); /** Fills the block */
     p->x = x;
@@ -172,62 +173,12 @@ void ButtonPassive(int x,int y){
 	}
 }
 
-/**
-    Deletes a button based on its label
-    char *label The label to search for
-*/
-
-int DeleteButtonByLabel(char *label){
-    Button* previous = NULL, *curr=pButtonList;
-    while(curr != NULL){
-        if (strcmp(label,curr->label)){
-            if(previous){
-                previous->next = curr->next;
-            } else {
-                pButtonList = curr->next;
-            }
-            // If the label is empty, free it
-            if(curr->label){
-                free(curr->label);
-            }
-            free(curr);
-            return 1;
-        }
-        previous = curr;
-        curr = curr-> next;
-    }
-    return 0;
-}
-
-/**
-    Deletes a button based on its ID
-    id int The button ID
-*/
-
-int DeleteButtonByLabel(int id){
-    Button *previous = NULL,*curr = pButtonList;
-	while (curr!=NULL) {
-		if ( id == curr->id ){
-			if(previous){
-				previous->next = curr->next;
-            }else{
-				pButtonList = curr->next;
-            }
-
-			if (curr->label) {
-				free(curr->label);
-			}
-			free(curr);
-			return 1;
-		}
-		previous = curr;
-		curr = curr->next;
-	}
-	return 0;
-}
-
 static void TheButtonCallback(){
-	printf("I have been called\n");
+	printf("See the world\n");
+}
+
+static void TheOtherButtonCallback(){
+	printf("Move the character\n");
 }
 
 /** 
@@ -302,7 +253,7 @@ void ButtonDraw(){
 		glLineWidth(1);
 
         /** We calculate the coordinates to center it */
-		fontx = b->x + (b->w - glutBitmapLength(GLUT_BITMAP_HELVETICA_10,b->label)) / 2 ;
+		fontx = b->x + (b->w - glutBitmapLength(GLUT_BITMAP_HELVETICA_10,reinterpret_cast<const unsigned char *>(b->label))) / 2 ;
 		fonty = b->y + (b->h+10)/2;
 
 		/** Move it a bit to change the appearance when pressed */
@@ -328,10 +279,11 @@ void ButtonDraw(){
 
 void Init()
 {
+    MickeyMouse = new Mouse();
 	glEnable(GL_LIGHT0);
 
-	CreateButton("Button1",TheButtonCallback,5,5,100,30);
-	CreateButton("Button2",TheButtonCallback,5,45,100,30);
+	CreateButton("See the world",TheButtonCallback,5,5,100,30);
+	CreateButton("Control a character",TheOtherButtonCallback,5,45,100,30);
 }
 
 /** Draw the 3D part */
