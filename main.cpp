@@ -402,7 +402,7 @@ int main(int argc,char **argv)
 	glutInitDisplayMode(GLUT_RGB|GLUT_DEPTH|GLUT_DOUBLE);
 	glutInitWindowSize(winw,winh);
 	glutInitWindowPosition(200,100);
-	glutCreateWindow("03 - Mouse Motion");
+	glutCreateWindow("Full Menu");
 
 	glutDisplayFunc(Draw);
 	glutReshapeFunc(Resize);
