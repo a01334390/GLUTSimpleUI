@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <assert.h>
 
+
 /** Include handmade Classes */
 #include "Mouse.hpp"
 
@@ -47,7 +48,7 @@ struct Button {
     int h; /** Height of the button */
     int state; /** 0 -> Idle, 1 -> Pressed */
     int highlighted; /** Pointer over the button */
-    char *label; /** text label */
+    char* label; /** text label */
     ButtonCallback callbackFunction; /** Function to call */
     struct Button* next; /** Next button */
 };
@@ -78,7 +79,7 @@ int CreateButton(char *label,ButtonCallback cb,int x,int y,int w,int h){
 	p->w = w;
 	p->h = h;
     p->callbackFunction = cb;
-	p->label = (char*)malloc( strlen(label)+1 );
+	p->label = (char*)malloc(strlen(label)+1);
     if(p->label){
         sprintf(p->label,label); //Pass the label to the struct
     }
@@ -325,12 +326,6 @@ void ButtonDraw(){
     }
 }
 
-
-
-/*----------------------------------------------------------------------------------------
- *	\brief	This function is called to initialise opengl.
- */
-
 void Init()
 {
 	glEnable(GL_LIGHT0);
@@ -339,134 +334,59 @@ void Init()
 	CreateButton("Button2",TheButtonCallback,5,45,100,30);
 }
 
-/*----------------------------------------------------------------------------------------
- *	This function will be used to draw the 3D scene
- */
-void Draw3D()
-{
+/** Draw the 3D part */
+void Draw3D(){
 	gluLookAt(0,1,5,0,0,0,0,1,0);
 	glutSolidTeapot(1);
 }
 
-/*----------------------------------------------------------------------------------------
- *	This function will be used to draw an overlay over the 3D scene.
- *	This will be used to draw our fonts, buttons etc......
- */
-void Draw2D()
-{
+/** Draw the overlay */
+void Draw2D(){
 	ButtonDraw();
 }
 
-/*----------------------------------------------------------------------------------------
- *	This is the main display callback function. It sets up the drawing for 
- *	The 3D scene first then calls the Draw3D() function. After that it switches to 
- *	an orthographic projection and calls Draw2D().
- */
-void Draw()
-{
-	/*
-	 *	Clear the background
-	 */
+void Draw(){
+
 	glClear( GL_COLOR_BUFFER_BIT |
 			 GL_DEPTH_BUFFER_BIT );
-
-	/*
-	 *	Enable lighting and the z-buffer
-	 */
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
-
-	/*
-	 *	Set perspective viewing transformation
-	 */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45,(winh==0)?(1):((float)winw/winh),1,100);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
-	/*
-	 *	Draw the 3D elements in the scene
-	 */
 	Draw3D();
-
-	/*
-	 *	Disable depth test and lighting for 2D elements
-	 */
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
-
-	/*
-	 *	Set the orthographic viewing transformation
-	 */
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0,winw,winh,0,-1,1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	/*
-	 *	Draw the 2D overlay
-	 */
+	/** Draw Buttons */
 	Draw2D();
-
-	/*
-	 *	Bring the back buffer to the front and vice-versa.
-	 */
 	glutSwapBuffers();
 }
 
-/*----------------------------------------------------------------------------------------
- *	This function is called when the window is resized. All this does is simply 
- *	store the new width and height of the window which are then referenced by
- *	the draw function to set the correct viewing transforms 
- */
-void Resize(int w, int h)
-{
+void Resize(int w, int h){
 	winw = w;
 	winh = h;
-
-	/*
-	 *	Allow drawing in full region of the screen
-	 */
 	glViewport(0,0,w,h);
 }
 
 
-/*----------------------------------------------------------------------------------------
- *	\brief	This function is called whenever a mouse button is pressed or released
- *	\param	button	-	GLUT_LEFT_BUTTON, GLUT_RIGHT_BUTTON, or GLUT_MIDDLE_BUTTON
- *	\param	state	-	GLUT_UP or GLUT_DOWN depending on whether the mouse was released
- *						or pressed respectivly. 
- *	\param	x		-	the x-coord of the mouse cursor.
- *	\param	y		-	the y-coord of the mouse cursor.
- */
-void MouseButton(int button,int state,int x, int y)
-{
-	/*
-	 *	update the mouse position
-	 */
+/** Called when a mouse button is pressed */
+void MouseButton(int button,int state,int x, int y){
 	MickeyMouse->x = x;
 	MickeyMouse->y = y;
-
-	/*
-	 *	has the button been pressed or released?
-	 */
-	if (state == GLUT_DOWN) 
-	{
-		/*
-		 *	This holds the location of the first mouse click
-		 */
-		//if ( !(MickeyMouse.lmb || MickeyMouse.mmb || MickeyMouse.rmb) ) {
+	if (state == GLUT_DOWN) {
+		/** Holds the first mouse click */
 			MickeyMouse->xpress = x;
 			MickeyMouse->ypress = y;
-		//}
-
-		/*
-		 *	Which button was pressed?
-		 */
-		switch(button) 
-		{
+        
+		switch(button) {
 		case GLUT_LEFT_BUTTON:
 			MickeyMouse->lmb = 1;
 			ButtonPress(x,y);
@@ -477,14 +397,9 @@ void MouseButton(int button,int state,int x, int y)
 			MickeyMouse->rmb = 1;
 			break;
 		}
-	}
-	else 
-	{
-		/*
-		 *	Which button was released?
-		 */
-		switch(button) 
-		{
+	} else {
+		/** When released, ...*/
+		switch(button) {
 		case GLUT_LEFT_BUTTON:
 			MickeyMouse->lmb = 0;
 			ButtonRelease(x,y);
@@ -497,80 +412,38 @@ void MouseButton(int button,int state,int x, int y)
 			break;
 		}
 	}
-
-	/*
-	 *	Force a redraw of the screen. If we later want interactions with the mouse
-	 *	and the 3D scene, we will need to redraw the changes.
-	 */
 	glutPostRedisplay();
 }
 
-/*----------------------------------------------------------------------------------------
- *	\brief	This function is called whenever the mouse cursor is moved AND A BUTTON IS HELD.
- *	\param	x	-	the new x-coord of the mouse cursor.
- *	\param	y	-	the new y-coord of the mouse cursor.
- */
-void MouseMotion(int x, int y)
-{
-	/*
-	 *	Calculate how much the mouse actually moved
-	 */
+/** Calculate how much it moved when buttons are held */
+void MouseMotion(int x, int y){
+	/** How much has it moved */
 	int dx = x - MickeyMouse->x;
 	int dy = y - MickeyMouse->y;
 
-	/*
-	 *	update the mouse position
-	 */
+	/** Update position */
 	MickeyMouse->x = x;
 	MickeyMouse->y = y;
-
-
-	/*
-	 *	Check MyButton to see if we should highlight it cos the mouse is over it
-	 */
+	/** Check if highlight necessary */
 	ButtonPassive(x,y);
-
-	/*
-	 *	Force a redraw of the screen
-	 */
+    /** Force redraw */
 	glutPostRedisplay();
 }
 
-/*----------------------------------------------------------------------------------------
- *	\brief	This function is called whenever the mouse cursor is moved AND NO BUTTONS ARE HELD.
- *	\param	x	-	the new x-coord of the mouse cursor.
- *	\param	y	-	the new y-coord of the mouse cursor.
- */
-void MousePassiveMotion(int x, int y)
-{
-	/*
-	 *	Calculate how much the mouse actually moved
-	 */
+/** Called when the mouse is moved */
+void MousePassiveMotion(int x, int y){
+	//Calculate how much the mouse has moved
 	int dx = x - MickeyMouse->x;
 	int dy = y - MickeyMouse->y;
 
-	/*
-	 *	update the mouse position
-	 */
+	// Update Mouse status
 	MickeyMouse->x = x;
 	MickeyMouse->y = y;
 
-	/*
-	 *	Check MyButton to see if we should highlight it cos the mouse is over it
-	 */
+    // Should we highlight it
 	ButtonPassive(x,y);
-
-	/*
-	 *	Note that I'm not using a glutPostRedisplay() call here. The passive motion function 
-	 *	is called at a very high frequency. We really don't want much processing to occur here.
-	 *	Redrawing the screen every time the mouse moves is a bit excessive. Later on we 
-	 *	will look at a way to solve this problem and force a redraw only when needed. 
-	 */
 }
 
-/*----------------------------------------------------------------------------------------
- *
- */
 int main(int argc,char **argv)
 {
 	glutInit(&argc,argv);
